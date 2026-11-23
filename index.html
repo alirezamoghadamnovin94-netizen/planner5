@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>پلنر روزانه من | Better Me</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="default">
+
+  <!-- تزئینات برگی پس‌زمینه -->
+  <div class="decor-branch decor-tl">
+    <svg viewBox="0 0 100 100" class="botanical-svg">
+      <path d="M10,90 Q40,40 90,10" stroke="#88BAA8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M40,55 Q30,45 25,50 C20,60 35,65 40,55 Z" fill="#B2DFDB"/>
+      <path d="M60,35 Q50,25 45,30 C40,40 55,45 60,35 Z" fill="#C8E6C9"/>
+      <path d="M75,20 Q68,10 65,15 C60,24 72,27 75,20 Z" fill="#A5D6A7"/>
+      <circle cx="85" cy="18" r="4" fill="#FFCC80"/>
+    </svg>
+  </div>
+  
+  <div class="decor-branch decor-tr">
+    <svg viewBox="0 0 100 100" class="botanical-svg flip-h">
+      <path d="M10,90 Q40,40 90,10" stroke="#88BAA8" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M40,55 Q30,45 25,50 C20,60 35,65 40,55 Z" fill="#C8E6C9"/>
+      <path d="M65,30 Q55,20 50,25 C45,35 60,40 65,30 Z" fill="#B2DFDB"/>
+      <circle cx="35" cy="65" r="3.5" fill="#FFE082"/>
+    </svg>
+  </div>
+
+  <!-- پاپ‌آپ هشدار صوتی و تصویری بلندتر و واضح‌تر (Alarm Toast) -->
+  <div id="reminderToast" class="reminder-toast alarm-pulse">
+    <div class="toast-header">
+      <span class="toast-icon">🚨</span>
+      <span class="toast-title">هشدار زمان مقرر!</span>
+      <span id="toastTime" class="toast-time">--:--</span>
+    </div>
+    <div id="toastTaskText" class="toast-body">عنوان کار</div>
+    <div class="toast-actions">
+      <button id="btnCompleteFromToast" class="btn-toast-check">انجام شد ✓</button>
+      <button id="btnCloseToast" class="btn-toast-dismiss">توقف هشدار 🔕</button>
+    </div>
+  </div>
+
+  <div class="planner-wrapper" id="mainPlannerView">
+    
+    <!-- هدر پلنر -->
+    <header class="planner-header">
+      <div class="header-top-row">
+        <div class="brand-box">
+          <div class="brand-title">Better<br><span>Me ♥</span></div>
+          <div class="sun-symbol">
+            <svg viewBox="0 0 50 50" class="sun-svg">
+              <circle cx="25" cy="25" r="10" fill="#FFE082" stroke="#FFCA28" stroke-width="2"/>
+              <g stroke="#FFCA28" stroke-width="2" stroke-linecap="round">
+                <line x1="25" y1="6" x2="25" y2="10"/>
+                <line x1="25" y1="40" x2="25" y2="44"/>
+                <line x1="6" y1="25" x2="10" y2="25"/>
+                <line x1="40" y1="25" x2="44" y2="25"/>
+                <line x1="12" y1="12" x2="15" y2="15"/>
+                <line x1="35" y1="35" x2="38" y2="38"/>
+                <line x1="12" y1="38" x2="15" y2="35"/>
+                <line x1="35" y1="12" x2="38" y2="15"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <div class="header-quote-area">
+          <h1 class="planner-quote">... هر روز فرصتی تازه است</h1>
+          <div class="header-middle-controls">
+            <div class="date-capsule">
+              <button id="prevDayBtn" class="nav-arrow" aria-label="روز قبل">❯</button>
+              <span class="cal-ico">📅</span>
+              <input type="text" id="currentDateDisplay" class="date-input-field" readonly>
+              <span id="currentDayNameDisplay" class="current-day-tag">شنبه</span>
+              <button id="nextDayBtn" class="nav-arrow" aria-label="روز بعد">❮</button>
+            </div>
+            <button id="btnJumpToToday" class="btn-today-badge" title="بازگشت به امروز">امروز</button>
+            <div class="live-clock-badge">
+              <span class="clock-icon">🕒</span>
+              <span id="liveClockText">--:--:--</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-decor-area">
+          <div class="love-badge-header">
+            <span>خودت را دوست داشته باش</span>
+            <span class="heart-icon">♥</span>
+          </div>
+          <!-- دکمه تنظیمات (شامل انتخابگر تم‌ها و تست آلارم) -->
+          <button id="openSettingsBtn" class="btn-gear-access" title="تنظیمات و تم‌ها">⚙️</button>
+        </div>
+      </div>
+
+      <!-- نوار هفته جاری (شنبه تا جمعه) -->
+      <div class="weekdays-nav-wrapper">
+        <div class="weekdays-strip" id="currentWeekStrip">
+          <div class="day-chip active" data-day-index="0"><span>شنبه</span><span class="chip-date-sub" id="wdate_0">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="1"><span>یکشنبه</span><span class="chip-date-sub" id="wdate_1">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="2"><span>دوشنبه</span><span class="chip-date-sub" id="wdate_2">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="3"><span>سه‌شنبه</span><span class="chip-date-sub" id="wdate_3">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="4"><span>چهارشنبه</span><span class="chip-date-sub" id="wdate_4">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="5"><span>پنجشنبه</span><span class="chip-date-sub" id="wdate_5">--/--</span><div class="dot-ind"></div></div>
+          <div class="day-chip" data-day-index="6"><span>جمعه</span><span class="chip-date-sub" id="wdate_6">--/--</span><div class="dot-ind"></div></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- محتوای کارت‌های پلنر -->
+    <main class="planner-content-grid">
+      
+      <!-- ۱. اهداف و پیشرفت -->
+      <section class="card-box card-goals">
+        <div class="card-pill-title"><span class="pill-icon">🎯</span><h2>اهداف و پیشرفت</h2></div>
+        <div class="goals-content">
+          <div class="field-row monthly-goal">
+            <label>هدف ماه:</label>
+            <input type="text" data-key="goal_month" class="soft-input-full" placeholder="هدف ماه من...">
+          </div>
+          <div class="priorities-container">
+            <div class="sub-lead">۳ اولویت اصلی:</div>
+            <div class="priority-row"><span class="p-num">۱</span><input type="text" data-key="prio_1" class="line-input" placeholder="..."></div>
+            <div class="priority-row"><span class="p-num">۲</span><input type="text" data-key="prio_2" class="line-input" placeholder="..."></div>
+            <div class="priority-row"><span class="p-num">۳</span><input type="text" data-key="prio_3" class="line-input" placeholder="..."></div>
+          </div>
+          <div class="habits-container">
+            <div class="habits-header-row">
+              <span class="sub-lead">عادت‌های جدید:</span>
+              <button id="addHabitBtn" class="circle-btn-add" title="افزودن">+</button>
+            </div>
+            <input type="text" data-key="new_habit_title" class="soft-input-full" placeholder="عادت جدید...">
+            <div class="habit-tracker-box">
+              <div class="tracker-title-sub">پیگیری عادت‌ها:</div>
+              <div class="habits-list" id="habitsDynamicList"></div>
+            </div>
+          </div>
+          <div class="wins-container">
+            <div class="sub-lead">موفقیت‌های کوچک:</div>
+            <textarea data-key="mini_wins" class="journal-box" rows="2" placeholder="دستاورد امروز..."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- ۲. ذهن و احساسات -->
+      <section class="card-box card-mind">
+        <div class="card-pill-title"><span class="pill-icon">💚</span><h2>ذهن و احساسات</h2></div>
+        <div class="mood-bar-container">
+          <span class="mood-headline">حال امروز من:</span>
+          <div class="mood-faces" id="moodFacesGroup">
+            <button type="button" class="mood-btn" data-mood="great"><span class="emoji">🥰</span><span class="txt">عالی</span></button>
+            <button type="button" class="mood-btn" data-mood="happy"><span class="emoji">😊</span><span class="txt">خوشحال</span></button>
+            <button type="button" class="mood-btn" data-mood="neutral"><span class="emoji">😐</span><span class="txt">معمولی</span></button>
+            <button type="button" class="mood-btn" data-mood="good"><span class="emoji">🙂</span><span class="txt">خوب</span></button>
+            <button type="button" class="mood-btn" data-mood="sad"><span class="emoji">🥺</span><span class="txt">غمگین</span></button>
+          </div>
+        </div>
+        <div class="prompts-grid">
+          <div class="prompt-item"><label>چیزی که ذهنم را درگیر کرده: <span>✏️</span></label><textarea data-key="mind_busy" class="journal-box" rows="2"></textarea></div>
+          <div class="prompt-item"><label>سه چیز که بابتشان شکرگزارم: <span>✏️</span></label><textarea data-key="mind_gratitude" class="journal-box" rows="2" placeholder="۱. &#10;۲. &#10;۳. "></textarea></div>
+          <div class="prompt-item"><label>چیزی که امروز خوشحالم کرد: <span>✏️</span></label><textarea data-key="mind_happy_thing" class="journal-box" rows="2"></textarea></div>
+          <div class="prompt-item"><label>چیزی که باید بهترش کنم: <span>✏️</span></label><textarea data-key="mind_better_me" class="journal-box" rows="2"></textarea></div>
+        </div>
+        <div class="card-corner-decor">🌼</div>
+      </section>
+
+      <!-- ۳. سلامتی -->
+      <section class="card-box card-health">
+        <div class="card-pill-title"><span class="pill-icon">🌿</span><h2>سلامتی</h2></div>
+        <div class="water-box">
+          <div class="water-top">
+            <span class="water-label">آب روزانه:</span>
+            <button id="addGlassBtn" class="circle-btn-add" title="افزودن">+</button>
+          </div>
+          <div class="water-glasses-flex" id="waterGlassesWrapper"></div>
+        </div>
+        <div class="meals-checklist-block">
+          <div class="checks-vertical">
+            <label class="custom-chk"><input type="checkbox" data-key="h_chk_bf"><span class="chk-tile"></span>صبحانه</label>
+            <label class="custom-chk"><input type="checkbox" data-key="h_chk_ln"><span class="chk-tile"></span>ناهار</label>
+            <label class="custom-chk"><input type="checkbox" data-key="h_chk_dn"><span class="chk-tile"></span>شام</label>
+            <label class="custom-chk"><input type="checkbox" data-key="h_chk_veg"><span class="chk-tile"></span>میوه و سبزیجات</label>
+            <label class="custom-chk"><input type="checkbox" data-key="h_chk_snk"><span class="chk-tile"></span>تنقلات سالم</label>
+          </div>
+          <div class="meals-input-pad">
+            <div class="pad-head">وعده‌های امروز:</div>
+            <div class="pad-row"><span>صبحانه:</span><input type="text" data-key="m_name_bf" class="line-input"><span class="radio-ring"></span></div>
+            <div class="pad-row"><span>ناهار:</span><input type="text" data-key="m_name_ln" class="line-input"><span class="radio-ring"></span></div>
+            <div class="pad-row"><span>شام:</span><input type="text" data-key="m_name_dn" class="line-input"><span class="radio-ring"></span></div>
+          </div>
+        </div>
+        <div class="food-plan-module">
+          <h3 class="inner-block-title">برنامه غذایی هفتگی</h3>
+          <div class="table-scroll-container">
+            <table class="pastel-table">
+              <thead><tr><th>وعده</th><th>ش</th><th>ی</th><th>د</th><th>س</th><th>چ</th><th>پ</th><th>ج</th></tr></thead>
+              <tbody>
+                <tr><td class="meal-col">صبحانه</td><td><input type="text" data-key="t_b_0"></td><td><input type="text" data-key="t_b_1"></td><td><input type="text" data-key="t_b_2"></td><td><input type="text" data-key="t_b_3"></td><td><input type="text" data-key="t_b_4"></td><td><input type="text" data-key="t_b_5"></td><td><input type="text" data-key="t_b_6"></td></tr>
+                <tr><td class="meal-col">ناهار</td><td><input type="text" data-key="t_l_0"></td><td><input type="text" data-key="t_l_1"></td><td><input type="text" data-key="t_l_2"></td><td><input type="text" data-key="t_l_3"></td><td><input type="text" data-key="t_l_4"></td><td><input type="text" data-key="t_l_5"></td><td><input type="text" data-key="t_l_6"></td></tr>
+                <tr><td class="meal-col">شام</td><td><input type="text" data-key="t_d_0"></td><td><input type="text" data-key="t_d_1"></td><td><input type="text" data-key="t_d_2"></td><td><input type="text" data-key="t_d_3"></td><td><input type="text" data-key="t_d_4"></td><td><input type="text" data-key="t_d_5"></td><td><input type="text" data-key="t_d_6"></td></tr>
+                <tr><td class="meal-col">میان‌وعده</td><td><input type="text" data-key="t_s_0"></td><td><input type="text" data-key="t_s_1"></td><td><input type="text" data-key="t_s_2"></td><td><input type="text" data-key="t_s_3"></td><td><input type="text" data-key="t_s_4"></td><td><input type="text" data-key="t_s_5"></td><td><input type="text" data-key="t_s_6"></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ۴. ورزش و تحرک -->
+      <section class="card-box card-sport">
+        <div class="card-pill-title"><span class="pill-icon">💪</span><h2>ورزش و تحرک</h2></div>
+        <div class="sport-entries">
+          <div class="sport-line"><label>نوع ورزش:</label><input type="text" data-key="sp_type" class="soft-input"><div class="stars-rating" data-rating="sp_r1"><span class="star-dot" data-val="1"></span><span class="star-dot" data-val="2"></span><span class="star-dot" data-val="3"></span><span class="star-dot" data-val="4"></span><span class="star-dot" data-val="5"></span></div></div>
+          <div class="sport-line"><label>مدت زمان:</label><input type="text" data-key="sp_dur" class="soft-input" placeholder="۴۵ دقیقه"><div class="stars-rating" data-rating="sp_r2"><span class="star-dot" data-val="1"></span><span class="star-dot" data-val="2"></span><span class="star-dot" data-val="3"></span><span class="star-dot" data-val="4"></span><span class="star-dot" data-val="5"></span></div></div>
+          <div class="sport-line"><label>تعداد قدم‌ها:</label><input type="text" data-key="sp_steps" class="soft-input" placeholder="۶,۵۰۰"><div class="stars-rating" data-rating="sp_r3"><span class="star-dot" data-val="1"></span><span class="star-dot" data-val="2"></span><span class="star-dot" data-val="3"></span><span class="star-dot" data-val="4"></span><span class="star-dot" data-val="5"></span></div></div>
+          <div class="sport-line"><label>کالری سوزی:</label><input type="text" data-key="sp_cal" class="soft-input" placeholder="۳۰۰"><div class="stars-rating" data-rating="sp_r4"><span class="star-dot" data-val="1"></span><span class="star-dot" data-val="2"></span><span class="star-dot" data-val="3"></span><span class="star-dot" data-val="4"></span><span class="star-dot" data-val="5"></span></div></div>
+          <div class="sport-line"><label>هدف هفته:</label><input type="text" data-key="sp_target" class="soft-input" placeholder="۵ روز"><div class="stars-rating" data-rating="sp_r5"><span class="star-dot" data-val="1"></span><span class="star-dot" data-val="2"></span><span class="star-dot" data-val="3"></span><span class="star-dot" data-val="4"></span><span class="star-dot" data-val="5"></span></div></div>
+        </div>
+        <div class="card-corner-decor">👟</div>
+      </section>
+
+      <!-- ۵. رسیدگی به خود -->
+      <section class="card-box card-selfcare">
+        <div class="card-pill-title"><span class="pill-icon">🌸</span><h2>رسیدگی به خود</h2></div>
+        <div class="selfcare-layout">
+          <div class="checks-vertical">
+            <label class="custom-chk"><input type="checkbox" data-key="sc_skin"><span class="chk-tile"></span>مراقبت پوست</label>
+            <label class="custom-chk"><input type="checkbox" data-key="sc_hair"><span class="chk-tile"></span>مراقبت مو</label>
+            <label class="custom-chk"><input type="checkbox" data-key="sc_bath"><span class="chk-tile"></span>حمام و رسیدگی بدن</label>
+            <label class="custom-chk"><input type="checkbox" data-key="sc_nails"><span class="chk-tile"></span>ناخن و زیبایی</label>
+            <label class="custom-chk"><input type="checkbox" data-key="sc_rest"><span class="chk-tile"></span>استراحت و آرامش</label>
+            <label class="custom-chk"><input type="checkbox" data-key="sc_myself"><span class="chk-tile"></span>یک کار فقط برای خودم</label>
+          </div>
+          <div class="selfcare-quote-card">
+            <div class="quote-symbol">🧖‍♀️</div>
+            <div class="affirmation-txt">You are<br><strong>enough</strong><br>♥</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ۶. خانه و زندگی -->
+      <section class="card-box card-home">
+        <div class="card-pill-title"><span class="pill-icon">🏠</span><h2>خانه و زندگی</h2></div>
+        <div class="home-layout">
+          <div class="checks-vertical">
+            <label class="custom-chk"><input type="checkbox" data-key="hm_clean"><span class="chk-tile"></span>کارهای خانه</label>
+            <label class="custom-chk"><input type="checkbox" data-key="hm_shop"><span class="chk-tile"></span>خرید</label>
+            <label class="custom-chk"><input type="checkbox" data-key="hm_pending"><span class="chk-tile"></span>کارهای عقب‌افتاده</label>
+            <label class="custom-chk"><input type="checkbox" data-key="hm_org"><span class="chk-tile"></span>نظم و مرتب‌سازی</label>
+            <label class="custom-chk"><input type="checkbox" data-key="hm_week"><span class="chk-tile"></span>کارهای مهم هفته</label>
+          </div>
+          <div class="sticky-paper"><div class="pin-symbol">📌</div><span>Home<br>Sweet<br>Home<br>♥</span></div>
+        </div>
+      </section>
+
+      <!-- ۷. روابط و عشق -->
+      <section class="card-box card-love">
+        <div class="card-pill-title"><span class="pill-icon">💛</span><h2>روابط و عشق</h2></div>
+        <div class="love-layout">
+          <div class="checks-vertical">
+            <label class="custom-chk"><input type="checkbox" data-key="lv_fam"><span class="chk-tile"></span>وقت با خانواده</label>
+            <label class="custom-chk"><input type="checkbox" data-key="lv_couple"><span class="chk-tile"></span>وقت دونفره</label>
+            <label class="custom-chk"><input type="checkbox" data-key="lv_friends"><span class="chk-tile"></span>تماس با دوستان</label>
+            <label class="custom-chk"><input type="checkbox" data-key="lv_kind"><span class="chk-tile"></span>یک کار محبت‌آمیز</label>
+            <label class="custom-chk"><input type="checkbox" data-key="lv_memo"><span class="chk-tile"></span>خاطره قشنگ امروز</label>
+          </div>
+          <div class="love-note-cloud"><span>زندگی زیباتر است وقتی با عشق پر شود...</span></div>
+        </div>
+      </section>
+
+      <!-- ۸. کتاب و رشد فردی -->
+      <section class="card-box card-book">
+        <div class="card-pill-title"><span class="pill-icon">📚</span><h2>کتاب و رشد فردی</h2></div>
+        <div class="book-inputs-stack">
+          <div class="book-row"><label>کتاب فعلی:</label><input type="text" data-key="bk_title" class="soft-input-full"></div>
+          <div class="book-row"><label>صفحات امروز:</label><input type="text" data-key="bk_pages" class="soft-input-full"></div>
+          <div class="book-row"><label>نکته‌ای که یاد گرفتم:</label><input type="text" data-key="bk_point" class="soft-input-full"></div>
+          <div class="book-row"><label>جمله مورد علاقه:</label><input type="text" data-key="bk_quote" class="soft-input-full"></div>
+        </div>
+        <div class="card-corner-decor">📖</div>
+      </section>
+
+      <!-- ۹. برنامه‌ریزی جامع -->
+      <section class="card-box card-planning">
+        <div class="card-pill-title"><span class="pill-icon">📅</span><h2>برنامه‌ریزی</h2></div>
+        
+        <div class="mini-cal-card">
+          <div class="cal-top-header">
+            <button id="prevMonthBtn" class="cal-switch">❮</button>
+            <span id="calMonthTitle" class="cal-name">شهریور ۱۴۰۴</span>
+            <button id="nextMonthBtn" class="cal-switch">❯</button>
+          </div>
+          <table class="mini-grid-table">
+            <thead><tr><th>ش</th><th>ی</th><th>د</th><th>س</th><th>چ</th><th>پ</th><th>ج</th></tr></thead>
+            <tbody id="calDaysGrid"></tbody>
+          </table>
+        </div>
+
+        <div class="time-allocated-planning-box">
+          <div class="cluster-head">
+            <span>⏱️ فازهای زمانی روز</span>
+            <button id="btnAddTimePhase" class="circle-btn-add" title="افزودن فاز">+</button>
+          </div>
+          <div class="time-slots-list" id="customTimePhasesContainer"></div>
+        </div>
+
+        <div class="schedule-split-container">
+          <div class="schedule-subcard">
+            <h4 class="sub-badge">برنامه هفتگی</h4>
+            <div class="mini-schedule-lines">
+              <div class="s-line"><span>شنبه:</span><input type="text" data-key="w_0"></div>
+              <div class="s-line"><span>یکشنبه:</span><input type="text" data-key="w_1"></div>
+              <div class="s-line"><span>دوشنبه:</span><input type="text" data-key="w_2"></div>
+              <div class="s-line"><span>سه‌شنبه:</span><input type="text" data-key="w_3"></div>
+              <div class="s-line"><span>چهارشنبه:</span><input type="text" data-key="w_4"></div>
+              <div class="s-line"><span>پنجشنبه:</span><input type="text" data-key="w_5"></div>
+              <div class="s-line"><span>جمعه:</span><input type="text" data-key="w_6"></div>
+            </div>
+          </div>
+          <div class="schedule-subcard">
+            <h4 class="sub-badge">برنامه روزانه</h4>
+            <div class="daily-parts-lines">
+              <div class="d-line"><span>صبح:</span><input type="text" data-key="d_morn"></div>
+              <div class="d-line"><span>ظهر:</span><input type="text" data-key="d_noon"></div>
+              <div class="d-line"><span>عصر:</span><input type="text" data-key="d_eve"></div>
+              <div class="d-line"><span>شب:</span><input type="text" data-key="d_ngt"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tasks-interactive-cluster">
+          <div class="task-list-module">
+            <div class="cluster-head">
+              <span>لیست کارهای زمان‌دار</span>
+              <button id="btnAddTask" class="circle-btn-add" title="افزودن">+</button>
+            </div>
+            <div class="items-list-box" id="taskListContainer"></div>
+          </div>
+          <div class="task-list-module">
+            <div class="cluster-head">
+              <span>🛒 خریدها</span>
+              <button id="btnAddShop" class="circle-btn-add" title="افزودن">+</button>
+            </div>
+            <div class="items-list-box" id="shopListContainer"></div>
+          </div>
+          <div class="notes-module">
+            <div class="cluster-head"><span>📝 یادداشت‌ها</span></div>
+            <textarea data-key="daily_notes" class="journal-box" rows="3"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <!-- ۱۰. قرار با خودم -->
+      <section class="card-box card-promise">
+        <div class="card-pill-title"><span class="pill-icon">☕</span><h2>قرار با خودم</h2></div>
+        <div class="promise-inner">
+          <div class="lead-saying">امروز می‌خواهم...</div>
+          <div class="checks-vertical">
+            <label class="custom-chk"><input type="checkbox" data-key="pr_selflove"><span class="chk-tile"></span>خودم را بیشتر دوست داشته باشم</label>
+            <label class="custom-chk"><input type="checkbox" data-key="pr_commitment"><span class="chk-tile"></span>به برنامه‌ام پایبند باشم</label>
+            <label class="custom-chk"><input type="checkbox" data-key="pr_patience"><span class="chk-tile"></span>صبورتر باشم</label>
+            <label class="custom-chk"><input type="checkbox" data-key="pr_step"><span class="chk-tile"></span>به اهدافم نزدیک‌تر شوم</label>
+          </div>
+        </div>
+        <div class="card-corner-decor">☕✨</div>
+      </section>
+
+    </main>
+
+    <!-- فوتر پلنر -->
+    <footer class="planner-footer-bar">
+      <div class="progress-indicator-wrap">
+        <span class="tick-icon-badge">✓</span>
+        <span id="footerPercentText">امروز: ۰٪ کامل شده</span>
+        <div class="bar-track"><div id="footerProgressBar" class="bar-fill"></div></div>
+      </div>
+      <div class="action-buttons-wrap">
+        <div id="saveToast" class="save-pill-tag">ذخیره شد ✓</div>
+        <button id="clearBtn" class="clear-day-btn"><span>🗑️</span> پاک کردن امروز</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- مودال تنظیمات با انتخابگر رنگی بصری تم‌ها و دکمه تست آلارم -->
+  <div id="settingsModal" class="dialog-mask">
+    <div class="dialog-box pro-modal-box">
+      <h3>⚙️ تنظیمات و انتخاب رنگ تم</h3>
+      <p class="text-muted" style="font-size:0.75rem; margin-top:4px;">روی هر تم رنگی کلیک کنید تا بلافاصله اعمال و ذخیره شود:</p>
+
+      <div class="theme-cards-grid mt-2">
+        <div class="theme-preview-card" data-theme="default" style="border-color: #2D8A79;">
+          <div class="theme-color-circle" style="background: #2D8A79;"></div>
+          <div class="theme-info">
+            <strong>رنگ ساده اصلی (Default)</strong>
+            <span>نعنایی ملایم ژورنال</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="navy" style="border-color: #1A365D;">
+          <div class="theme-color-circle" style="background: #1A365D;"></div>
+          <div class="theme-info">
+            <strong>سرمه‌ای (Navy Blue)</strong>
+            <span>رسمی و متمرکز</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="purple" style="border-color: #7E57C2;">
+          <div class="theme-color-circle" style="background: #7E57C2;"></div>
+          <div class="theme-info">
+            <strong>بنفش (Purple)</strong>
+            <span>جذاب و آرامش‌بخش</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="pink" style="border-color: #D85A7E;">
+          <div class="theme-color-circle" style="background: #D85A7E;"></div>
+          <div class="theme-info">
+            <strong>صورتی (Pink)</strong>
+            <span>لطیف و زیبا</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="lemon" style="border-color: #F59E0B;">
+          <div class="theme-color-circle" style="background: #F59E0B;"></div>
+          <div class="theme-info">
+            <strong>زرد لیمویی (Lemon Yellow)</strong>
+            <span>پرانرژی و شاداب</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="black" style="border-color: #1F2937;">
+          <div class="theme-color-circle" style="background: #1F2937;"></div>
+          <div class="theme-info">
+            <strong>مشکی (Black)</strong>
+            <span>تاریک و شیک</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+
+        <div class="theme-preview-card" data-theme="white" style="border-color: #9CA3AF;">
+          <div class="theme-color-circle" style="background: #F9FAFB; border: 1px solid #ccc;"></div>
+          <div class="theme-info">
+            <strong>سفید (White)</strong>
+            <span>مینیمال و پاک</span>
+          </div>
+          <span class="active-theme-check">✓</span>
+        </div>
+      </div>
+
+      <div class="test-alarm-section mt-3">
+        <button type="button" id="btnTestAlarm" class="btn-outline-pill w-100" style="padding: 8px; font-weight: 800;">🔔 تست صدای آلارم</button>
+      </div>
+
+      <div class="dialog-actions mt-3">
+        <button type="button" id="btnCloseSettingsModal" class="btn-action-primary">بستن و ذخیره</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- دیالوگ تایید پاکسازی روز -->
+  <div id="modalConfirm" class="dialog-mask">
+    <div class="dialog-box">
+      <h3>پاک کردن اطلاعات امروز</h3>
+      <p>آیا مطمئن هستید که می‌خواهید اطلاعات امروز را پاک کنید؟</p>
+      <div class="dialog-actions">
+        <button id="btnYesDelete" class="btn-action-del">بله، پاک کن</button>
+        <button id="btnCancelDelete" class="btn-action-cancel">لغو</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
